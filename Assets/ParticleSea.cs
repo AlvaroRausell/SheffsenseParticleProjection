@@ -23,6 +23,10 @@ public class ParticleSea : MonoBehaviour
     private bool canChange = false;  
     private bool firstTime = true;
     public int multiplier = 5;
+    private float PM10;
+    private float PM25;
+    public Text PM10Text;
+    public Text PM25Text;
     // Start is called before the first frame update
     void Start()
     {
@@ -90,11 +94,18 @@ public class ParticleSea : MonoBehaviour
                 }
                 else {
                     // Show results as text
-                string jsonString =  www.downloadHandler.text;
-                    var rx = new System.Text.RegularExpressions.Regex("\"aqi\":");
-                    AQI = int.Parse(rx.Split(jsonString)[1].Split(',')[0]);
+                    string jsonString =  www.downloadHandler.text;
+                    PMValues values = new PMValues();
+                    values = JsonUtility.FromJson<PMValues>(jsonString);
+                    AQI = values.data.aqi;
+                   // var rx = new System.Text.RegularExpressions.Regex("\"aqi\":");
+                   // AQI = int.Parse(rx.Split(jsonString)[1].Split(',')[0]);
+                   PM10 = values.data.iaqi.pm10.v;
+                   PM25 = values.data.iaqi.pm25.v;
                     Debug.Log(AQI);
                     cityName.text = cities[cityIndex];
+                    PM10Text.text = "PM10: "+PM10;
+                    PM25Text.text = "PM2.5: "+PM25;
                     changeCity();
                     // Debug.Log(jsonString.Split(new[] { "\"aqi\":" }));
                 
@@ -108,3 +119,30 @@ public class ParticleSea : MonoBehaviour
     }
 }
 
+[System.Serializable]
+public class PMValues
+{
+    public Data data;
+}
+
+[System.Serializable]
+public class Data
+{
+    public int aqi;
+    public IAQI iaqi;
+}
+
+[System.Serializable]
+public class IAQI {
+    public Value pm10;
+    public Value pm25;
+}
+
+[System.Serializable]
+public class Value{
+    public float v;
+
+    public string ToString(){
+        return ""+v;
+    }
+}
